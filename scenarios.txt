@@ -1,0 +1,55 @@
+void insertStudentInGroup(group)
+	1) open group file
+	2) get student info from input
+	3) write student in file
+	4) close file
+
+void removeStudentFromgroup(group)
+	1) open group file
+	2) get student fn from input
+	3) delete student from file
+	4) close file
+
+vector<vector<string>> getSortedStudentsGroupsByInputPredicate(groups)
+asc/desc by gpa/fn 
+	1) get type of sorting from input
+	2) getStudentsFromGroup(group) for all groups
+	3) sort array given predicate
+	4) return sorted array
+
+void saveSortedGroup(group)
+	1) getSortedStudentsGroupsByInputPredicate(groups)
+	2) open, save file and close
+
+void printStudentsFromGroup(group)
+	1) getStudentsFromGroup(group)
+	2) print students array
+
+void printSortedGroupsInfo(groups)
+	1) sort# given groups
+	2) print students info
+
+vector<vector<string>> getStudentsFromGroup(group)
+	1) open group file
+	2) parse students into vector
+	3) close file
+
+int main(){
+Please select option:
+1) Insert student in a group
+2) Remove student from a group
+3) Print all students from a group
+4) Sort a student group
+	-asc/desc
+	-by gpa/fn
+	4.1) Save the sorted group?
+		Y/N
+5) Print sorted student groups
+	5.1) Please input desired groups (1 to 8), separated by commas
+		Example - 1,2,3,7
+	5.2) Sort ascending or descending?
+	5.3) Sort by GPA or faculty number?
+6) Exit
+
+
+}

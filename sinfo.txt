@@ -1,0 +1,31 @@
+1gr
+txt
+Name:Ivan Ivanov Ivanov;FN:4MI0600221;Courses:DIS/6.00,Algebra/5.00,UP/5.50
+Name:Ivan Ivanov Ivanov;FN:4MI0600221;Courses:DIS/6.00,Algebra/5.00,UP/5.50
+
+json
+[
+ {
+  name:"Ivan Ivanov Ivanov",
+  fn:"4MI0600221",
+  courses:[
+    DIS:6.00,
+    Algebra:5.00
+    UP:5.50
+  ]
+ },
+ {
+  name:"Ivan Ivanov Ivanov",
+  fn:"4MI0600221",
+  courses:[
+    DIS:6.00,
+    Algebra:5.00
+    UP:5.50
+  ]
+ }
+]
+
+csv
+Name, FN, Courses
+Ivan Ivanov Ivanov,4MI0600221,DIS/6.00;Algebra/5.00;UP/5.50
+Ivan Ivanov Ivanov,4MI0600221,DIS/6.00;Algebra/5.00;UP/5.50

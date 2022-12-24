@@ -43,6 +43,12 @@ short handleInputGroup()
 	return group;
 }
 
+void handleFileNotOpenError()
+{
+	std::cout << "Error while opening the file.";
+	exit(-1);
+}
+
 std::string getFilenameFromGroup(short group)
 {
 	std::string filename = "csv/group";
@@ -62,7 +68,7 @@ std::vector<std::string> parseStudentString(std::string line)
 			student[i] += line[lineIndex];
 			lineIndex++;
 		}
-		student[i] += '\0';
+		//student[i] += '\0';
 		lineIndex++;
 	}
 
@@ -79,8 +85,7 @@ std::vector<std::vector<std::string>> getStudentsFromGroup(short group)
 
 	std::ifstream file(filename);
 	if (!file.is_open()) {
-		std::cout << "Error while opening the file.";
-		exit(-1);
+		handleFileNotOpenError();
 	}
 
 	bool headerLine = true;
@@ -103,21 +108,50 @@ void insertStudentInGroup(short group)
 {
 	const std::string filename = getFilenameFromGroup(group);
 
-	std::ifstream file(filename);
+	/*std::ifstream file(filename);
 	if (!file.is_open()) {
-		std::cout << "Error while opening the file.";
-		exit(-1);
+		handleFileNotOpenError();
+	}*/
+}
+
+void removeStudentFromGroup(short group, const std::string fn)
+{
+	const std::string filename = getFilenameFromGroup(group);
+
+	const std::vector<std::vector<std::string>> students = getStudentsFromGroup(group);
+
+	std::ofstream file(filename);
+	if (!file.is_open()) {
+		handleFileNotOpenError();
 	}
+
+	std::string fileOutputString = "Name,Fn,Courses\n";
+
+	const size_t studentsCount = students.size();
+	for (size_t i = 0; i < studentsCount; i++)
+	{
+		std::vector<std::string> student = students[i];
+		if (fn == student[1])
+		{
+			continue;
+		}
+
+		fileOutputString += student[0] + "," + student[1] + "," + student[2];
+
+		if (i != studentsCount - 1)
+		{
+			fileOutputString += "\n";
+		}
+
+	}
+	file << fileOutputString;
+
+	file.close();
 }
 
-void removeStudentFromGroup(short group)
+void printStudentsInGroup(const short group)
 {
-
-}
-
-void printStudentsInGroup(short group)
-{
-	std::vector<std::vector<std::string>> students = getStudentsFromGroup(group);
+	const std::vector<std::vector<std::string>> students = getStudentsFromGroup(group);
 
 	std::cout << "Name\t\t\tFN\t\tSubjects&Grades\n";
 	for (std::vector<std::string> student : students)
@@ -128,19 +162,23 @@ void printStudentsInGroup(short group)
 
 void handleInsertStudentInGroup()
 {
-	short group = handleInputGroup();
+	const short group = handleInputGroup();
 	insertStudentInGroup(group);
 }
 
 void handleRemoveStudentFromGroup()
 {
-	short group = handleInputGroup();
-	removeStudentFromGroup(group);
+	const short group = handleInputGroup();
+	std::string fn;
+
+	std::cout << "Please input the faculty number of the student\n";
+	std::cin >> fn;
+	removeStudentFromGroup(group, fn);
 }
 
 void handlePrintStudentsInGroup()
 {
-	short group = handleInputGroup();
+	const short group = handleInputGroup();
 	printStudentsInGroup(group);
 }
 

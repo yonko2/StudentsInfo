@@ -49,7 +49,7 @@ void handleFileNotOpenError()
 	exit(-1);
 }
 
-std::string getFilenameFromGroup(short group)
+std::string getFilenameFromGroup(const short group)
 {
 	std::string filename = "csv/group";
 	filename += group + '0';
@@ -68,7 +68,6 @@ std::vector<std::string> parseStudentString(std::string line)
 			student[i] += line[lineIndex];
 			lineIndex++;
 		}
-		//student[i] += '\0';
 		lineIndex++;
 	}
 
@@ -104,21 +103,9 @@ std::vector<std::vector<std::string>> getStudentsFromGroup(short group)
 	return students;
 }
 
-void insertStudentInGroup(short group)
+void saveGroupToFile(const std::vector<std::vector<std::string>> students, const short group)
 {
 	const std::string filename = getFilenameFromGroup(group);
-
-	/*std::ifstream file(filename);
-	if (!file.is_open()) {
-		handleFileNotOpenError();
-	}*/
-}
-
-void removeStudentFromGroup(short group, const std::string fn)
-{
-	const std::string filename = getFilenameFromGroup(group);
-
-	const std::vector<std::vector<std::string>> students = getStudentsFromGroup(group);
 
 	std::ofstream file(filename);
 	if (!file.is_open()) {
@@ -131,10 +118,6 @@ void removeStudentFromGroup(short group, const std::string fn)
 	for (size_t i = 0; i < studentsCount; i++)
 	{
 		std::vector<std::string> student = students[i];
-		if (fn == student[1])
-		{
-			continue;
-		}
 
 		fileOutputString += student[0] + "," + student[1] + "," + student[2];
 
@@ -142,18 +125,60 @@ void removeStudentFromGroup(short group, const std::string fn)
 		{
 			fileOutputString += "\n";
 		}
-
 	}
 	file << fileOutputString;
 
 	file.close();
 }
 
+bool isFnUnique(const std::string fn)
+{
+	for (short i = 1; i <= 8; i++)
+	{
+		std::vector<std::vector<std::string>> studentsGroup = getStudentsFromGroup(i);
+		for (std::vector<std::string> student : studentsGroup)
+		{
+			if (fn==student[1])
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+void insertStudentInGroup(const short group, const std::vector<std::string> student)
+{
+	std::vector<std::vector<std::string>> students = getStudentsFromGroup(group);
+
+	students.push_back(student);
+
+	saveGroupToFile(students, group);
+}
+
+void removeStudentFromGroup(const short group, const std::string fn)
+{
+	std::vector<std::vector<std::string>> students = getStudentsFromGroup(group);
+
+	for (size_t i = 0; i < students.size(); i++)
+	{
+		std::vector<std::string> student = students[i];
+		if (fn == student[1])
+		{
+			students.erase(students.begin() + i);
+			i--;
+		}
+	}
+
+	saveGroupToFile(students, group);
+	std::cout << "Student removed successfully";
+}
+
 void printStudentsInGroup(const short group)
 {
 	const std::vector<std::vector<std::string>> students = getStudentsFromGroup(group);
 
-	std::cout << "Name\t\t\tFN\t\tSubjects&Grades\n";
+	std::cout << "Name\t\t\tFN\t\tCourses\n";
 	for (std::vector<std::string> student : students)
 	{
 		std::cout << student[0] << "\t" << student[1] << "\t" << student[2] << "\n";
@@ -163,7 +188,43 @@ void printStudentsInGroup(const short group)
 void handleInsertStudentInGroup()
 {
 	const short group = handleInputGroup();
-	insertStudentInGroup(group);
+	std::string name, fn, courses;
+
+	std::cout << "Please input the student's name: ";
+	std::cin >> name;
+	std::cout << "\n";
+
+	std::cout << "Please input a faculty number: ";
+	std::cin >> fn;
+	std::cout << "\n";
+	while (!isFnUnique(fn))
+	{
+		std::cout << "This faculty number already exists. Please input another faculty number: ";
+		std::cin >> fn;
+		std::cout << "\n";
+	}
+
+	short coursesNumber = 0;
+	do
+	{
+		std::cout << "Please input the number of student courses (from 1 to 10): ";
+		std::cin >> coursesNumber;
+		std::cout << "\n";
+	} while (coursesNumber < 1 || coursesNumber>10);
+
+	for (short i = 0; i < coursesNumber; i++)
+	{
+		std::string currentCourse, currentGrade;
+		std::cout << "Insert course No. " << (char)(i+1+'0') << " ";
+		std::cin >> currentCourse;
+		std::cout << "With grade: ";
+		std::cin >> currentGrade;
+
+		courses += currentCourse + "/" + currentGrade + ";";
+	}
+
+	const std::vector<std::string> student = { name,fn,courses };
+	insertStudentInGroup(group, student);
 }
 
 void handleRemoveStudentFromGroup()

@@ -5,10 +5,12 @@
 
 const short GROUP_LOWER_RANGE = 1;
 const short GROUP_UPPER_RANGE = 8;
+const short GRADE_LOWER_RANGE = 2;
+const short GRADE_UPPER_RANGE = 6;
 
 void printOptions()
 {
-	std::cout << "Please choose an option:\n"
+	std::cout << "\nPlease choose an option:\n"
 		"1) Insert student in a group\n"
 		"2) Remove student from a group\n"
 		"3) Print all students from a group\n"
@@ -22,7 +24,8 @@ void printOptions()
 		"Example - 1, 2, 3, 7\n"
 		"5.2) Sort ascending or descending ?\n"
 		"5.3) Sort by GPA or faculty number ?\n"*/
-		"6) Exit\n";
+		"6) Exit\n"
+		"\nPlease choose an option: ";
 }
 
 short handleInputGroup()
@@ -57,7 +60,7 @@ std::string getFilenameFromGroup(const short group)
 	return filename;
 }
 
-std::vector<std::string> parseStudentString(std::string line)
+std::vector<std::string> parseStudentString(const std::string line)
 {
 	size_t lineIndex = 0;
 	std::vector<std::string> student = { "","","" };
@@ -74,7 +77,7 @@ std::vector<std::string> parseStudentString(std::string line)
 	return student;
 }
 
-std::vector<std::vector<std::string>> getStudentsFromGroup(short group)
+std::vector<std::vector<std::string>> getStudentsFromGroup(const short group)
 {
 	// Each student is a string vector
 	// [0] - Name, [1] - FN, [2] Subjects composite string
@@ -138,11 +141,27 @@ bool isFnUnique(const std::string fn)
 		std::vector<std::vector<std::string>> studentsGroup = getStudentsFromGroup(i);
 		for (std::vector<std::string> student : studentsGroup)
 		{
-			if (fn==student[1])
+			if (fn == student[1])
 			{
 				return false;
 			}
 		}
+	}
+	return true;
+}
+
+bool isGradeValid(const std::string grade)
+{
+	if (grade.length() != 4)
+	{
+		return false;
+	}
+	if (grade[0] < GRADE_LOWER_RANGE + '0' || grade[0]> GRADE_UPPER_RANGE + '0' ||
+		grade[1] != '.' ||
+		grade[2] < '0' || grade[2]>'9' ||
+		grade[3] < '0' || grade[3]>'9')
+	{
+		return false;
 	}
 	return true;
 }
@@ -210,15 +229,24 @@ void handleInsertStudentInGroup()
 		std::cout << "Please input the number of student courses (from 1 to 10): ";
 		std::cin >> coursesNumber;
 		std::cout << "\n";
-	} while (coursesNumber < 1 || coursesNumber>10);
+	} while (coursesNumber < 1 || coursesNumber > 10);
 
 	for (short i = 0; i < coursesNumber; i++)
 	{
 		std::string currentCourse, currentGrade;
-		std::cout << "Insert course No. " << (char)(i+1+'0') << " ";
+		std::cout << "Insert course No. " << (char)(i + 1 + '0') << " ";
 		std::cin >> currentCourse;
-		std::cout << "With grade: ";
+		std::cout << "With grade (between "
+			<< GRADE_LOWER_RANGE
+			<< " and "
+			<< GRADE_UPPER_RANGE
+			<< " with two decimal digits): ";
 		std::cin >> currentGrade;
+		while (!isGradeValid(currentGrade))
+		{
+			std::cout << "Please input a grade in the correct format: ";
+			std::cin >> currentGrade;
+		}
 
 		courses += currentCourse + "/" + currentGrade + ";";
 	}

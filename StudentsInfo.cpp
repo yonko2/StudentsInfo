@@ -14,17 +14,8 @@ void printOptions()
 		"1) Insert student in a group\n"
 		"2) Remove student from a group\n"
 		"3) Print all students from a group\n"
-		"4) Sort a student group\n"
-		/*"- asc / desc\n"
-		"- by gpa / fn\n"
-		"4.1) Save the sorted group \n?"
-		"Y / N\n"*/
-		"5) Print sorted student groups\n"
-		/*"5.1) Please input desired groups(1 to 8), separated by commas\n"
-		"Example - 1, 2, 3, 7\n"
-		"5.2) Sort ascending or descending ?\n"
-		"5.3) Sort by GPA or faculty number ?\n"*/
-		"6) Exit\n"
+		"4) Sort student group(s)\n"
+		"5) Exit\n"
 		"\nPlease choose an option: ";
 }
 
@@ -44,6 +35,36 @@ short handleInputGroup()
 	}
 
 	return group;
+}
+
+std::vector<short> handleInputGroups()
+{
+	std::vector<short> groups;
+
+	short groupCount = 0;
+	std::cout << "How many groups do you wish to process? ";
+	std::cin >> groupCount;
+
+	for (short i = 0; i < groupCount; i++)
+	{
+		short group = 0;
+
+		std::cout << "Please choose group No. " << i << " from "
+			<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << "\n";
+		std::cin >> group;
+
+		while (group<GROUP_LOWER_RANGE || group>GROUP_UPPER_RANGE)
+		{
+			std::cout << "This group does not exist.\n";
+			std::cout << "Please choose a group from "
+				<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << "\n";
+			std::cin >> group;
+		}
+
+		groups.push_back(group);
+	}
+
+	return groups;
 }
 
 void handleFileNotOpenError()
@@ -204,6 +225,19 @@ void printStudentsInGroup(const short group)
 	}
 }
 
+
+// TODO: Implement feature
+void sortStudentGroups(const std::vector<short> groups)
+{
+	std::vector<std::vector<std::vector<std::string>>> studentGroups;
+
+	for (const short group : groups)
+	{
+		std::vector<std::vector<std::string>> studentGroup = getStudentsFromGroup(group);
+
+	}
+}
+
 void handleInsertStudentInGroup()
 {
 	const short group = handleInputGroup();
@@ -271,14 +305,33 @@ void handlePrintStudentsInGroup()
 	printStudentsInGroup(group);
 }
 
-void handleSortStudentGroup()
+void handleSortStudentGroups()
 {
+	bool isAscending = true;
+	std::cout << "Sort ascending or descending?";
+	std::string sortOrder;
+	std::cin >> sortOrder;
+	while (sortOrder != "ascending" || sortOrder != "descending")
+	{
+		std::cout << "Please choose a valid sort order (ascending/descending): ";
+		std::cin >> sortOrder;
+	}
+	isAscending = sortOrder == "ascending";
 
-}
+	bool isSortingByGPA = true;
+	std::cout << "Sort by GPA or FN? ";
+	std::string sortByOption;
+	std::cin >> sortByOption;
+	while (sortByOption != "GPA" || sortByOption != "FN")
+	{
+		std::cout << "Please choose a valid sort type (GPA/FN): ";
+		std::cin >> sortByOption;
+	}
+	isSortingByGPA = sortByOption == "GPA";
 
-void handlePrintSortedStudentGroups()
-{
+	std::vector<short> groups = handleInputGroups();
 
+	sortStudentGroups(groups);
 }
 
 int main()
@@ -302,21 +355,17 @@ int main()
 			handlePrintStudentsInGroup();
 			break;
 		case 4:
-			handleSortStudentGroup();
+			handleSortStudentGroups();
 			break;
 		case 5:
-			handlePrintSortedStudentGroups();
-			break;
-		case 6:
 			return 0; // Exit program
 		default:
-			std::cout << "Please choose an option between 1 and 6.\n";
-
+			std::cout << "Please choose an option between 1 and 5.\n";
 		}
 
 		//system("cls"); // Clear console output for windows
 		printOptions();
-	} while (actionNumber != 6);
+	} while (actionNumber != 5);
 
 	return 0;
 }

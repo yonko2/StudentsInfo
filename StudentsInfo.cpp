@@ -42,14 +42,14 @@ short handleInputGroup()
 {
 	short group = 0;
 	std::cout << "Please choose a group from "
-		<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << "\n";
+		<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << ": ";
 	std::cin >> group;
 
 	while (group<GROUP_LOWER_RANGE || group>GROUP_UPPER_RANGE)
 	{
 		std::cout << "This group does not exist.\n";
 		std::cout << "Please choose a group from "
-			<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << "\n";
+			<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << ": ";
 		std::cin >> group;
 	}
 
@@ -69,14 +69,14 @@ std::vector<short> handleInputGroups()
 		short group = 0;
 
 		std::cout << "Please choose group No. " << i + 1 << " from "
-			<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << "\n";
+			<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << ": ";
 		std::cin >> group;
 
 		while (group<GROUP_LOWER_RANGE || group>GROUP_UPPER_RANGE)
 		{
 			std::cout << "This group does not exist.\n";
 			std::cout << "Please choose a group from "
-				<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << "\n";
+				<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << ": ";
 			std::cin >> group;
 		}
 
@@ -107,6 +107,20 @@ std::string getCoursesString(const std::vector<course> courses)
 	for (const course course : courses)
 	{
 		output += course.name + '/' + course.grade + ';';
+	}
+
+	output.erase(output.length() - 1);
+
+	return output;
+}
+
+std::string getCoursesOutputString(const std::vector<course> courses)
+{
+	std::string output;
+
+	for (const course course : courses)
+	{
+		output += course.name + '/' + course.grade + ' ';
 	}
 
 	output.erase(output.length() - 1);
@@ -262,7 +276,7 @@ double getGPA(const student student)
 
 	for (const course course : student.courses)
 	{
-		gpa += std::stod(course.grade); // test if it works for . and ,
+		gpa += std::stod(course.grade);
 	}
 
 	return gpa / student.courses.size();
@@ -297,11 +311,11 @@ void removeStudentFromGroup(const short group, const std::string fn)
 
 void printStudentGroup(const studentGroup studentGroup)
 {
-	std::cout << "Name\t\t\tFN\t\tCourses\n";
+	std::cout << "\nName\t\t\tFN\t\tCourses\n";
 	for (const student student : studentGroup.students)
 	{
 		std::cout << student.name << "\t" << student.fn
-			<< "\t" << getCoursesString(student.courses) << "\n";
+			<< "\t" << getCoursesOutputString(student.courses) << "\n";
 	}
 }
 
@@ -412,16 +426,13 @@ void handleInsertStudentInGroup()
 
 	std::cout << "Please input the student's name: ";
 	std::cin >> name;
-	std::cout << "\n";
 
 	std::cout << "Please input a faculty number: ";
 	std::cin >> fn;
-	std::cout << "\n";
 	while (!isFnUnique(fn))
 	{
 		std::cout << "This faculty number already exists. Please input another faculty number: ";
 		std::cin >> fn;
-		std::cout << "\n";
 	}
 
 	short coursesNumber = 0;
@@ -429,7 +440,6 @@ void handleInsertStudentInGroup()
 	{
 		std::cout << "Please input the number of student courses (from 1 to 10): ";
 		std::cin >> coursesNumber;
-		std::cout << "\n";
 	} while (coursesNumber < 1 || coursesNumber > 10);
 
 	for (short i = 0; i < coursesNumber; i++)
@@ -462,7 +472,7 @@ void handleRemoveStudentFromGroup()
 	const short group = handleInputGroup();
 	std::string fn;
 
-	std::cout << "Please input the faculty number of the student\n";
+	std::cout << "Please input the faculty number of the student: ";
 	std::cin >> fn;
 	removeStudentFromGroup(group, fn);
 }
@@ -473,7 +483,6 @@ void handlePrintStudentsInGroup()
 	printStudentGroup(getStudentsFromGroup(group));
 }
 
-// TODO: Test event
 void handleSortStudentGroups()
 {
 	bool isSortingByGPA = true;
@@ -523,7 +532,7 @@ void handleSortStudentGroups()
 		{
 			saveGroupToFile(studentGroupSorted);
 		}
-		std::cout << "Groups saved successfully to the corresponding files";
+		std::cout << "\nGroups saved successfully to the corresponding files";
 	}
 }
 
@@ -551,12 +560,12 @@ int main()
 			handleSortStudentGroups();
 			break;
 		case 5:
+			std::cout << "\nThank you for using our app!\n";
 			return 0; // Exit program
 		default:
-			std::cout << "Please choose an option between 1 and 5.\n";
+			std::cout << "Please choose an option between 1 and 5: ";
 		}
 
-		//system("cls"); // Clear console output for windows
 		printOptions();
 	} while (actionNumber != 5);
 

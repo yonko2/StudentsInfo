@@ -8,6 +8,25 @@ const short GROUP_UPPER_RANGE = 8;
 const short GRADE_LOWER_RANGE = 2;
 const short GRADE_UPPER_RANGE = 6;
 
+struct course
+{
+	std::string name;
+	std::string grade;
+};
+
+struct student
+{
+	std::string name;
+	std::string fn;
+	std::vector<course> courses;
+};
+
+struct studentGroup
+{
+	short group;
+	std::vector<student> students;
+};
+
 void printOptions()
 {
 	std::cout << "\nPlease choose an option:\n"
@@ -81,30 +100,76 @@ std::string getFilenameFromGroup(const short group)
 	return filename;
 }
 
-std::vector<std::string> parseStudentString(const std::string line)
+std::string getCoursesString(const std::vector<course> courses)
+{
+	std::string output;
+
+	for (const course course : courses)
+	{
+		output += course.name + '/' + course.grade + ';';
+	}
+
+	output.erase(output.length() - 1);
+
+	return output;
+}
+
+student parseStudentString(const std::string line)
 {
 	size_t lineIndex = 0;
-	std::vector<std::string> student = { "","","" };
+	student student;
 
-	for (size_t i = 0; i < 3; i++)
-	{
-		while (line[lineIndex] != ',' && line[lineIndex] != '\0') {
-			student[i] += line[lineIndex];
-			lineIndex++;
-		}
+	while (line[lineIndex] != ',') {
+		student.name += line[lineIndex];
 		lineIndex++;
 	}
+	lineIndex++;
+
+	while (line[lineIndex] != ',') {
+		student.fn += line[lineIndex];
+		lineIndex++;
+	}
+	lineIndex++;
+
+	std::vector<course> courses;
+	bool appendToName = true;
+	course course;
+	while (line[lineIndex] != '\0') {
+		if (line[lineIndex] == '/')
+		{
+			appendToName = false;
+		}
+		else if (line[lineIndex] == ';')
+		{
+			courses.push_back(course);
+			appendToName = true;
+
+			course.name = "";
+			course.grade = "";
+		}
+		else
+		{
+			if (appendToName)
+			{
+				course.name += line[lineIndex];
+			}
+			else
+			{
+				course.grade += line[lineIndex];
+			}
+		}
+
+		lineIndex++;
+	}
+	student.courses = courses;
 
 	return student;
 }
 
-std::vector<std::vector<std::string>> getStudentsFromGroup(const short group)
+studentGroup getStudentsFromGroup(const short group)
 {
-	// Each student is a string vector
-	// [0] - Name, [1] - FN, [2] Subjects composite string
-
 	const std::string filename = getFilenameFromGroup(group);
-	std::vector<std::vector<std::string>> students;
+	std::vector<student> students;
 
 	std::ifstream file(filename);
 	if (!file.is_open()) {
@@ -124,12 +189,14 @@ std::vector<std::vector<std::string>> getStudentsFromGroup(const short group)
 	}
 	file.close();
 
-	return students;
+	studentGroup studentGroup = { group, students };
+
+	return studentGroup;
 }
 
-void saveGroupToFile(const std::vector<std::vector<std::string>> students, const short group)
+void saveGroupToFile(const studentGroup studentGroup)
 {
-	const std::string filename = getFilenameFromGroup(group);
+	const std::string filename = getFilenameFromGroup(studentGroup.group);
 
 	std::ofstream file(filename);
 	if (!file.is_open()) {
@@ -138,12 +205,13 @@ void saveGroupToFile(const std::vector<std::vector<std::string>> students, const
 
 	std::string fileOutputString = "Name,Fn,Courses\n";
 
-	const size_t studentsCount = students.size();
+	const size_t studentsCount = studentGroup.students.size();
 	for (size_t i = 0; i < studentsCount; i++)
 	{
-		std::vector<std::string> student = students[i];
+		student student = studentGroup.students[i];
 
-		fileOutputString += student[0] + "," + student[1] + "," + student[2];
+		fileOutputString += student.name + "," + student.fn +
+			"," + getCoursesString(student.courses);
 
 		if (i != studentsCount - 1)
 		{
@@ -159,10 +227,10 @@ bool isFnUnique(const std::string fn)
 {
 	for (short i = 1; i <= 8; i++)
 	{
-		std::vector<std::vector<std::string>> studentsGroup = getStudentsFromGroup(i);
-		for (std::vector<std::string> student : studentsGroup)
+		studentGroup studentsGroup = getStudentsFromGroup(i);
+		for (student student : studentsGroup)
 		{
-			if (fn == student[1])
+			if (fn == student.fn)
 			{
 				return false;
 			}
@@ -187,55 +255,152 @@ bool isGradeValid(const std::string grade)
 	return true;
 }
 
-void insertStudentInGroup(const short group, const std::vector<std::string> student)
+double getGPA(const student student)
 {
-	std::vector<std::vector<std::string>> students = getStudentsFromGroup(group);
+	double gpa = 0;
 
-	students.push_back(student);
+	for (const course course : student.courses)
+	{
+		gpa += std::stod(course.grade); // test if it works for . and ,
+	}
 
-	saveGroupToFile(students, group);
+	return gpa / student.courses.size();
+}
+
+void insertStudentInGroup(const short group, const student student)
+{
+	studentGroup studentGroup = getStudentsFromGroup(group);
+
+	studentGroup.students.push_back(student);
+
+	saveGroupToFile(studentGroup);
 }
 
 void removeStudentFromGroup(const short group, const std::string fn)
 {
-	std::vector<std::vector<std::string>> students = getStudentsFromGroup(group);
+	studentGroup studentGroup = getStudentsFromGroup(group);
 
-	for (size_t i = 0; i < students.size(); i++)
+	for (size_t i = 0; i < studentGroup.students.size(); i++)
 	{
-		std::vector<std::string> student = students[i];
-		if (fn == student[1])
+		student student = studentGroup.students[i];
+		if (fn == student.fn)
 		{
-			students.erase(students.begin() + i);
+			studentGroup.students.erase(studentGroup.students.begin() + i);
 			i--;
 		}
 	}
 
-	saveGroupToFile(students, group);
+	saveGroupToFile(studentGroup);
 	std::cout << "Student removed successfully";
 }
 
-void printStudentsInGroup(const short group)
+void printStudentGroup(const studentGroup studentGroup)
 {
-	const std::vector<std::vector<std::string>> students = getStudentsFromGroup(group);
-
 	std::cout << "Name\t\t\tFN\t\tCourses\n";
-	for (std::vector<std::string> student : students)
+	for (student student : studentGroup)
 	{
-		std::cout << student[0] << "\t" << student[1] << "\t" << student[2] << "\n";
+		std::cout << student.name << "\t" << student.fn
+			<< "\t" << getCoursesString(student.courses) << "\n";
 	}
 }
 
-
-// TODO: Implement feature
-void sortStudentGroups(const std::vector<short> groups)
+void sortStudentGroup(studentGroup& studentGroup, bool isSortingByGPA, bool isAscending)
 {
-	std::vector<std::vector<std::vector<std::string>>> studentGroups;
+	const size_t groupSize = studentGroup.students.size();
+
+	// Bubble sort
+	if (isSortingByGPA && isAscending)
+	{
+		for (size_t step = 0; step < groupSize; step++)
+		{
+			for (size_t i = 0; i < groupSize - step; i++)
+			{
+				if (getGPA(studentGroup.students[i]) > getGPA(studentGroup.students[i + 1]))
+				{
+					std::swap(studentGroup.students[i], studentGroup.students[i + 1]);
+				}
+			}
+		}
+	}
+	else if (isSortingByGPA && !isAscending)
+	{
+		for (size_t step = 0; step < groupSize; step++)
+		{
+			for (size_t i = 0; i < groupSize - step; i++)
+			{
+				if (getGPA(studentGroup.students[i]) < getGPA(studentGroup.students[i + 1]))
+				{
+					std::swap(studentGroup.students[i], studentGroup.students[i + 1]);
+				}
+			}
+		}
+	}
+	else if (!isSortingByGPA && isAscending)
+	{
+		for (size_t step = 0; step < groupSize; step++)
+		{
+			for (size_t i = 0; i < groupSize - step; i++)
+			{
+				if (studentGroup.students[i].fn > studentGroup.students[i + 1].fn)
+				{
+					std::swap(studentGroup.students[i], studentGroup.students[i + 1]);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (size_t step = 0; step < groupSize; step++)
+		{
+			for (size_t i = 0; i < groupSize - step; i++)
+			{
+				if (studentGroup.students[i].fn < studentGroup.students[i + 1].fn)
+				{
+					std::swap(studentGroup.students[i], studentGroup.students[i + 1]);
+				}
+			}
+		}
+	}
+}
+
+std::vector<studentGroup> getStudentGroups(const std::vector<short> groups)
+{
+	std::vector<studentGroup> studentGroups;
 
 	for (const short group : groups)
 	{
-		std::vector<std::vector<std::string>> studentGroup = getStudentsFromGroup(group);
-
+		studentGroups.push_back(getStudentsFromGroup(group));
 	}
+
+	return studentGroups;
+}
+	
+std::vector<studentGroup> getSortedStudentGroups(const std::vector<short> groups, bool isSortingByGPA,bool isAscending)
+{
+	std::vector<studentGroup> studentGroupsSorted = getStudentGroups(groups);
+
+	for (studentGroup studentGroup : studentGroupsSorted)
+	{
+		sortStudentGroup(studentGroup, isSortingByGPA, isAscending);
+	}
+
+	return studentGroupsSorted;
+}
+
+studentGroup getStudentGroupAggregate(std::vector<studentGroup> studentGroups)
+{
+	studentGroup studentGroupAggregate;
+	studentGroupAggregate.group = 0;
+
+	for (const studentGroup studentGroup : studentGroups)
+	{
+		for (const student student : studentGroup.students)
+		{
+			studentGroupAggregate.students.push_back(student);
+		}
+	}
+
+	return studentGroupAggregate;
 }
 
 void handleInsertStudentInGroup()
@@ -302,22 +467,12 @@ void handleRemoveStudentFromGroup()
 void handlePrintStudentsInGroup()
 {
 	const short group = handleInputGroup();
-	printStudentsInGroup(group);
+	printStudentGroup(getStudentsFromGroup(group));
 }
 
+// TODO: Test event
 void handleSortStudentGroups()
 {
-	bool isAscending = true;
-	std::cout << "Sort ascending or descending?";
-	std::string sortOrder;
-	std::cin >> sortOrder;
-	while (sortOrder != "ascending" || sortOrder != "descending")
-	{
-		std::cout << "Please choose a valid sort order (ascending/descending): ";
-		std::cin >> sortOrder;
-	}
-	isAscending = sortOrder == "ascending";
-
 	bool isSortingByGPA = true;
 	std::cout << "Sort by GPA or FN? ";
 	std::string sortByOption;
@@ -329,9 +484,44 @@ void handleSortStudentGroups()
 	}
 	isSortingByGPA = sortByOption == "GPA";
 
-	std::vector<short> groups = handleInputGroups();
+	bool isAscending = true;
+	std::cout << "Sort ascending or descending?";
+	std::string sortOrder;
+	std::cin >> sortOrder;
+	while (sortOrder != "ascending" || sortOrder != "descending")
+	{
+		std::cout << "Please choose a valid sort order (ascending/descending): ";
+		std::cin >> sortOrder;
+	}
+	isAscending = sortOrder == "ascending";
 
-	sortStudentGroups(groups);
+	const std::vector<short> groups = handleInputGroups();
+
+	studentGroup studentGroupAggregate = getStudentGroupAggregate(getStudentGroups(groups));
+
+	sortStudentGroup(studentGroupAggregate, isSortingByGPA, isAscending);
+	printStudentGroup(studentGroupAggregate);
+
+	bool saveSortedGroups = false;
+	std::cout << "Do you wish to save the sorted groups? (Y/N) ";
+	std::string saveGroups;
+	std::cin >> saveGroups;
+	while (saveGroups != "Y" || saveGroups != "N")
+	{
+		std::cout << "Please choose a valid answer (Y/N): ";
+		std::cin >> saveGroups;
+	}
+	saveSortedGroups = saveGroups == "Y";
+
+	const std::vector<studentGroup> studentGroupsSorted = getSortedStudentGroups(groups, isAscending, isSortingByGPA);
+
+	if (saveSortedGroups)
+	{
+		for (const studentGroup studentGroupSorted : studentGroupsSorted)
+		{
+			saveGroupToFile(studentGroupSorted);
+		}
+	}
 }
 
 int main()

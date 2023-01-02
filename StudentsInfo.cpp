@@ -238,7 +238,7 @@ void saveGroupToFile(const studentGroup studentGroup)
 	file.close();
 }
 
-bool isFnUnique(const std::string fn)
+bool fnExists(const std::string fn)
 {
 	for (short i = 1; i <= 8; i++)
 	{
@@ -247,11 +247,11 @@ bool isFnUnique(const std::string fn)
 		{
 			if (fn == student.fn)
 			{
-				return false;
+				return true;
 			}
 		}
 	}
-	return true;
+	return false;
 }
 
 bool isGradeValid(const std::string grade)
@@ -306,7 +306,6 @@ void removeStudentFromGroup(const short group, const std::string fn)
 	}
 
 	saveGroupToFile(studentGroup);
-	std::cout << "Student removed successfully";
 }
 
 void printStudentGroup(const studentGroup studentGroup)
@@ -429,7 +428,7 @@ void handleInsertStudentInGroup()
 
 	std::cout << "Please input a faculty number: ";
 	std::cin >> fn;
-	while (!isFnUnique(fn))
+	while (fnExists(fn))
 	{
 		std::cout << "This faculty number already exists. Please input another faculty number: ";
 		std::cin >> fn;
@@ -465,6 +464,7 @@ void handleInsertStudentInGroup()
 
 	const student student = { name, fn, courses };
 	insertStudentInGroup(group, student);
+	std::cout << "Student successfully added.\n";
 }
 
 void handleRemoveStudentFromGroup()
@@ -474,7 +474,13 @@ void handleRemoveStudentFromGroup()
 
 	std::cout << "Please input the faculty number of the student: ";
 	std::cin >> fn;
+	while (!fnExists(fn))
+	{
+		std::cout << "This faculty number doesn't exist, please input another: ";
+		std::cin >> fn;
+	}
 	removeStudentFromGroup(group, fn);
+	std::cout << "Student removed successfully.\n";
 }
 
 void handlePrintStudentsInGroup()
@@ -532,7 +538,7 @@ void handleSortStudentGroups()
 		{
 			saveGroupToFile(studentGroupSorted);
 		}
-		std::cout << "\nGroups saved successfully to the corresponding files";
+		std::cout << "Groups saved successfully to the corresponding files.\n";
 	}
 }
 

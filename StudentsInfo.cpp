@@ -1,12 +1,23 @@
+/**
+*
+* Solution to course project # 5
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2022/2023
+*
+* @author Yonko Draganov
+* @idnumber 4MI0600221
+* @compiler VC
+*
+* Main source file
+*
+*/
+
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
-
-const short GROUP_LOWER_RANGE = 1;
-const short GROUP_UPPER_RANGE = 8;
-const short GRADE_LOWER_RANGE = 2;
-const short GRADE_UPPER_RANGE = 6;
 
 struct course
 {
@@ -38,7 +49,7 @@ void printOptions()
 		"\nPlease choose an option: ";
 }
 
-short handleInputGroup()
+short handleInputGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
 	short group = 0;
 	std::cout << "Please choose a group from "
@@ -56,7 +67,7 @@ short handleInputGroup()
 	return group;
 }
 
-std::vector<short> handleInputGroups()
+std::vector<short> handleInputGroups(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
 	std::vector<short> groups;
 
@@ -254,7 +265,7 @@ bool fnExists(const std::string fn)
 	return false;
 }
 
-bool isGradeValid(const std::string grade)
+bool isGradeValid(const std::string grade, const short GRADE_LOWER_RANGE, const short GRADE_UPPER_RANGE)
 {
 	if (grade.length() != 4)
 	{
@@ -417,9 +428,10 @@ studentGroup getStudentGroupAggregate(const std::vector<studentGroup> studentGro
 	return studentGroupAggregate;
 }
 
-void handleInsertStudentInGroup()
+void handleInsertStudentInGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE,
+	const short GRADE_LOWER_RANGE, const short GRADE_UPPER_RANGE)
 {
-	const short group = handleInputGroup();
+	const short group = handleInputGroup(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
 	std::string name, fn;
 	std::vector<course> courses;
 
@@ -452,7 +464,7 @@ void handleInsertStudentInGroup()
 			<< GRADE_UPPER_RANGE
 			<< " with two decimal digits): ";
 		std::cin >> currentGrade;
-		while (!isGradeValid(currentGrade))
+		while (!isGradeValid(currentGrade, GRADE_LOWER_RANGE, GRADE_UPPER_RANGE))
 		{
 			std::cout << "Please input a grade in the correct format: ";
 			std::cin >> currentGrade;
@@ -467,9 +479,9 @@ void handleInsertStudentInGroup()
 	std::cout << "Student successfully added.\n";
 }
 
-void handleRemoveStudentFromGroup()
+void handleRemoveStudentFromGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
-	const short group = handleInputGroup();
+	const short group = handleInputGroup(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
 	std::string fn;
 
 	std::cout << "Please input the faculty number of the student: ";
@@ -483,13 +495,13 @@ void handleRemoveStudentFromGroup()
 	std::cout << "Student removed successfully.\n";
 }
 
-void handlePrintStudentsInGroup()
+void handlePrintStudentsInGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
-	const short group = handleInputGroup();
+	const short group = handleInputGroup(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
 	printStudentGroup(getStudentsFromGroup(group));
 }
 
-void handleSortStudentGroups()
+void handleSortStudentGroups(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
 	bool isSortingByGPA = true;
 	std::cout << "Sort by GPA or FN? ";
@@ -513,7 +525,7 @@ void handleSortStudentGroups()
 	}
 	isAscending = sortOrder == "ascending";
 
-	const std::vector<short> groups = handleInputGroups();
+	const std::vector<short> groups = handleInputGroups(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
 
 	studentGroup studentGroupAggregate = getStudentGroupAggregate(getStudentGroups(groups));
 
@@ -550,20 +562,25 @@ int main()
 	short actionNumber = 0;
 	do
 	{
+		const short GROUP_LOWER_RANGE = 1;
+		const short GROUP_UPPER_RANGE = 8;
+		const short GRADE_LOWER_RANGE = 2;
+		const short GRADE_UPPER_RANGE = 6;
+
 		std::cin >> actionNumber;
 		switch (actionNumber)
 		{
 		case 1:
-			handleInsertStudentInGroup();
+			handleInsertStudentInGroup(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE, GRADE_LOWER_RANGE, GRADE_UPPER_RANGE);
 			break;
 		case 2:
-			handleRemoveStudentFromGroup();
+			handleRemoveStudentFromGroup(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
 			break;
 		case 3:
-			handlePrintStudentsInGroup();
+			handlePrintStudentsInGroup(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
 			break;
 		case 4:
-			handleSortStudentGroups();
+			handleSortStudentGroups(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
 			break;
 		case 5:
 			std::cout << "\nThank you for using our app!\n";

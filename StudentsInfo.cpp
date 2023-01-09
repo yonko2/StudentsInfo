@@ -388,26 +388,6 @@ std::vector<studentGroup> getStudentGroups(const std::vector<short> groups)
 }
 
 /**
- * Get a vector of sorted student groups.
- *
- * @param groups A vector of the desired groups.
- * @param isSortingByGPA True if sorting by GPA, false if sorting by faculty number.
- * @param isAscending True if sorting in ascending order, false if in descending order.
- * @return A vector of the sorted student groups.
- */
-std::vector<studentGroup> getSortedStudentGroups(const std::vector<short> groups, const bool isSortingByGPA, const bool isAscending)
-{
-	std::vector<studentGroup> studentGroupsSorted = getStudentGroups(groups);
-
-	for (studentGroup& studentGroup : studentGroupsSorted)
-	{
-		sortStudentGroup(studentGroup, isSortingByGPA, isAscending);
-	}
-
-	return studentGroupsSorted;
-}
-
-/**
  * Get an aggregate studentGroup from the param vector of student groups.
  *
  * @param studentGroups A vector of the desired student groups.
@@ -548,6 +528,26 @@ void sortStudentGroup(studentGroup& studentGroup, const bool isSortingByGPA, con
 			}
 		}
 	}
+}
+
+/**
+ * Get a vector of sorted student groups.
+ *
+ * @param groups A vector of the desired groups.
+ * @param isSortingByGPA True if sorting by GPA, false if sorting by faculty number.
+ * @param isAscending True if sorting in ascending order, false if in descending order.
+ * @return A vector of the sorted student groups.
+ */
+std::vector<studentGroup> getSortedStudentGroups(const std::vector<short> groups, const bool isSortingByGPA, const bool isAscending)
+{
+	std::vector<studentGroup> studentGroupsSorted = getStudentGroups(groups);
+
+	for (studentGroup& studentGroup : studentGroupsSorted)
+	{
+		sortStudentGroup(studentGroup, isSortingByGPA, isAscending);
+	}
+
+	return studentGroupsSorted;
 }
 
 // Program flow option event handlers

@@ -40,7 +40,7 @@ struct studentGroup
 /// Prints the dialog text, describing user options.
 void printOptions()
 {
-	std::cout << "\nPlease choose an option:\n"
+	std::cout << "\nAvailable options:\n"
 		"1) Insert student in a group\n"
 		"2) Remove student from a group\n"
 		"3) Print all students from a group\n"

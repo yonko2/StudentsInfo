@@ -13,7 +13,6 @@
 *
 */
 
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -34,10 +33,11 @@ struct student
 
 struct studentGroup
 {
-	short group;
+	short group = 0;
 	std::vector<student> students;
 };
 
+/// Prints the dialog text, describing user options.
 void printOptions()
 {
 	std::cout << "\nPlease choose an option:\n"
@@ -49,6 +49,13 @@ void printOptions()
 		"\nPlease choose an option: ";
 }
 
+/**
+ * Gets a valid group from the user input in the correct format between param ranges.
+ *
+ * @param GROUP_LOWER_RANGE minimal allowed group number (inclusive).
+ * @param GROUP_UPPER_RANGE maximal allowed group number (inclusive).
+ * @return Group number.
+ */
 short handleInputGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
 	short group = 0;
@@ -56,7 +63,7 @@ short handleInputGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RA
 		<< GROUP_LOWER_RANGE << " to " << GROUP_UPPER_RANGE << ": ";
 	std::cin >> group;
 
-	while (group<GROUP_LOWER_RANGE || group>GROUP_UPPER_RANGE)
+	while (group < GROUP_LOWER_RANGE || group > GROUP_UPPER_RANGE)
 	{
 		std::cout << "This group does not exist.\n";
 		std::cout << "Please choose a group from "
@@ -67,6 +74,13 @@ short handleInputGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RA
 	return group;
 }
 
+/**
+ * Gets multiple valid groups from the user input in the correct format between param ranges.
+ *
+ * @param GROUP_LOWER_RANGE minimal allowed group number (inclusive).
+ * @param GROUP_UPPER_RANGE maximal allowed group number (inclusive).
+ * @return A vector with the group values.
+ */
 std::vector<short> handleInputGroups(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
 	std::vector<short> groups;
@@ -97,12 +111,19 @@ std::vector<short> handleInputGroups(const short GROUP_LOWER_RANGE, const short 
 	return groups;
 }
 
+/// Prints an error message, pointing to an error while opening a file and exits the program.
 void handleFileNotOpenError()
 {
 	std::cout << "Error while opening the file.";
 	exit(-1);
 }
 
+/**
+ * Derives the filename for the corresponding csv file from the group param.
+ *
+ * @param group The desired group.
+ * @returns Filename in a string.
+ */
 std::string getFilenameFromGroup(const short group)
 {
 	std::string filename = "csv/group";
@@ -111,6 +132,13 @@ std::string getFilenameFromGroup(const short group)
 	return filename;
 }
 
+/**
+ * Concatenates the param courses information into a string.
+ *
+ * @example [{"Algebra", 5.20}, {"DIS", 4.50}] -> "Algebra/5.20;DIS/4.50"
+ * @param courses A vector with the courses.
+ * @return Courses information in a string, semicolon delimited.
+ */
 std::string getCoursesString(const std::vector<course> courses)
 {
 	std::string output;
@@ -125,6 +153,13 @@ std::string getCoursesString(const std::vector<course> courses)
 	return output;
 }
 
+/**
+ * Concatenates the param courses information into a string for the program print output.
+ *
+ * @example [{"Algebra", 5.20}, {"DIS", 4.50}] -> "Algebra/5.20 DIS/4.50"
+ * @param courses A vector with the courses.
+ * @return Courses information in a string, space delimited.
+ */
 std::string getCoursesOutputString(const std::vector<course> courses)
 {
 	std::string output;
@@ -139,6 +174,15 @@ std::string getCoursesOutputString(const std::vector<course> courses)
 	return output;
 }
 
+/**
+ * Get student information from a string.
+ *
+ * @example "Ivan Ivanov Ivanov,0MI00000000,Algebra/5.20;DIS/5.50" ->
+ * {"Ivan Ivanov Ivanov","0MI0000000",[{"Algebra",5.20},{"DIS",5.50}]}
+ * @param line The information string.
+ * @return A student struct.
+ *
+ */
 student parseStudentString(const std::string line)
 {
 	size_t lineIndex = 0;
@@ -192,6 +236,12 @@ student parseStudentString(const std::string line)
 	return student;
 }
 
+/**
+ * Get a student group from input group.
+ *
+ * @param group The student group.
+ * @return A studentGroup struct.
+ */
 studentGroup getStudentsFromGroup(const short group)
 {
 	const std::string filename = getFilenameFromGroup(group);
@@ -220,6 +270,11 @@ studentGroup getStudentsFromGroup(const short group)
 	return studentGroup;
 }
 
+/**
+ * Save a student group to the corresponding group file.
+ *
+ * @param studentGroup The desired student group.
+ */
 void saveGroupToFile(const studentGroup studentGroup)
 {
 	const std::string filename = getFilenameFromGroup(studentGroup.group);
@@ -249,6 +304,12 @@ void saveGroupToFile(const studentGroup studentGroup)
 	file.close();
 }
 
+/**
+ * Checks if the input faculty number (fn) already is present in any of the groups.
+ *
+ * @param fn The to be checked faculty number (fn)
+ * @return A boolean, true if it already exists, else false.
+ */
 bool fnExists(const std::string fn)
 {
 	for (short i = 1; i <= 8; i++)
@@ -265,22 +326,37 @@ bool fnExists(const std::string fn)
 	return false;
 }
 
+/**
+ * Validates the input grade if it's between the param ranges and if it's in the correct format (X.XX)
+ *
+ * @param grade The input grade.
+ * @param GRADE_LOWER_RANGE minimal allowed grade number (inclusive).
+ * @param GRADE_UPPER_RANGE maximal allowed grade number (inclusive).
+ * @return A boolean, true if the grade is valid, else false.
+ */
 bool isGradeValid(const std::string grade, const short GRADE_LOWER_RANGE, const short GRADE_UPPER_RANGE)
 {
 	if (grade.length() != 4)
 	{
 		return false;
 	}
-	if (grade[0] < GRADE_LOWER_RANGE + '0' || grade[0]> GRADE_UPPER_RANGE + '0' ||
+	if (grade[0] < GRADE_LOWER_RANGE + '0' ||
+		grade[0] > GRADE_UPPER_RANGE + '0' ||
 		grade[1] != '.' ||
-		grade[2] < '0' || grade[2]>'9' ||
-		grade[3] < '0' || grade[3]>'9')
+		grade[2] < '0' || grade[2] > '9' ||
+		grade[3] < '0' || grade[3] > '9')
 	{
 		return false;
 	}
 	return true;
 }
 
+/**
+ * Get the GPA of a student.
+ *
+ * @param student The desired student.
+ * @return The Grade Point Average (GPA) of the student.
+ */
 double getGPA(const student student)
 {
 	double gpa = 0;
@@ -293,6 +369,74 @@ double getGPA(const student student)
 	return gpa / student.courses.size();
 }
 
+/**
+ * Get a vector of student groups from param groups.
+ *
+ * @param groups A vector of the desired groups.
+ * @return A vector if student groups.
+ */
+std::vector<studentGroup> getStudentGroups(const std::vector<short> groups)
+{
+	std::vector<studentGroup> studentGroups;
+
+	for (const short group : groups)
+	{
+		studentGroups.push_back(getStudentsFromGroup(group));
+	}
+
+	return studentGroups;
+}
+
+/**
+ * Get a vector of sorted student groups.
+ *
+ * @param groups A vector of the desired groups.
+ * @param isSortingByGPA True if sorting by GPA, false if sorting by faculty number.
+ * @param isAscending True if sorting in ascending order, false if in descending order.
+ * @return A vector of the sorted student groups.
+ */
+std::vector<studentGroup> getSortedStudentGroups(const std::vector<short> groups, const bool isSortingByGPA, const bool isAscending)
+{
+	std::vector<studentGroup> studentGroupsSorted = getStudentGroups(groups);
+
+	for (studentGroup& studentGroup : studentGroupsSorted)
+	{
+		sortStudentGroup(studentGroup, isSortingByGPA, isAscending);
+	}
+
+	return studentGroupsSorted;
+}
+
+/**
+ * Get an aggregate studentGroup from the param vector of student groups.
+ *
+ * @param studentGroups A vector of the desired student groups.
+ * @return A single studentGroup struct with group 0 and students all extracted students from the param student groups.
+ */
+studentGroup getStudentGroupAggregate(const std::vector<studentGroup> studentGroups)
+{
+	studentGroup studentGroupAggregate;
+	studentGroupAggregate.group = 0;
+
+	for (const studentGroup studentGroup : studentGroups)
+	{
+		for (const student student : studentGroup.students)
+		{
+			studentGroupAggregate.students.push_back(student);
+		}
+	}
+
+	return studentGroupAggregate;
+}
+
+// Event functionalities
+
+/**
+ * Inserts a student in the param group and saves the amended group.
+ *
+ * @param group The desired group.
+ * @param student The desired student.
+ */
 void insertStudentInGroup(const short group, const student student)
 {
 	studentGroup studentGroup = getStudentsFromGroup(group);
@@ -302,6 +446,12 @@ void insertStudentInGroup(const short group, const student student)
 	saveGroupToFile(studentGroup);
 }
 
+/**
+ * Removes a student with param faculty number from the param group and saves the amended group.
+ *
+ * @param group The desired group.
+ * @param fn The faculty number of the desired student.
+ */
 void removeStudentFromGroup(const short group, const std::string fn)
 {
 	studentGroup studentGroup = getStudentsFromGroup(group);
@@ -319,6 +469,11 @@ void removeStudentFromGroup(const short group, const std::string fn)
 	saveGroupToFile(studentGroup);
 }
 
+/**
+ * Prints information of the param studentGroup
+ *
+ * @param studentGroup The desired student group.
+ */
 void printStudentGroup(const studentGroup studentGroup)
 {
 	std::cout << "\nName\t\t\tFN\t\tCourses\n";
@@ -329,7 +484,14 @@ void printStudentGroup(const studentGroup studentGroup)
 	}
 }
 
-void sortStudentGroup(studentGroup& studentGroup, bool isSortingByGPA, bool isAscending)
+/**
+ * Sorts the param student group by GPA/FN and in ASC/DESC order with the Bubble sort algorithm.
+ *
+ * @param studentGroup The desired student group (passed by ref).
+ * @param isSortingByGPA True if sorting by GPA, false if sorting by faculty number.
+ * @param isAscending True if sorting in ascending order, false if in descending order.
+ */
+void sortStudentGroup(studentGroup& studentGroup, const bool isSortingByGPA, const bool isAscending)
 {
 	const size_t groupSize = studentGroup.students.size() - 1;
 
@@ -388,46 +550,16 @@ void sortStudentGroup(studentGroup& studentGroup, bool isSortingByGPA, bool isAs
 	}
 }
 
-std::vector<studentGroup> getStudentGroups(const std::vector<short> groups)
-{
-	std::vector<studentGroup> studentGroups;
+// Program flow option event handlers
 
-	for (const short group : groups)
-	{
-		studentGroups.push_back(getStudentsFromGroup(group));
-	}
-
-	return studentGroups;
-}
-
-std::vector<studentGroup> getSortedStudentGroups(const std::vector<short> groups, bool isSortingByGPA, bool isAscending)
-{
-	std::vector<studentGroup> studentGroupsSorted = getStudentGroups(groups);
-
-	for (studentGroup& studentGroup : studentGroupsSorted)
-	{
-		sortStudentGroup(studentGroup, isSortingByGPA, isAscending);
-	}
-
-	return studentGroupsSorted;
-}
-
-studentGroup getStudentGroupAggregate(const std::vector<studentGroup> studentGroups)
-{
-	studentGroup studentGroupAggregate;
-	studentGroupAggregate.group = 0;
-
-	for (const studentGroup studentGroup : studentGroups)
-	{
-		for (const student student : studentGroup.students)
-		{
-			studentGroupAggregate.students.push_back(student);
-		}
-	}
-
-	return studentGroupAggregate;
-}
-
+/**
+ * Handles the input of data, needed to insert a student into a group.
+ *
+ * @param GROUP_LOWER_RANGE minimal allowed group number (inclusive).
+ * @param GROUP_UPPER_RANGE maximal allowed group number (inclusive).
+ * @param GRADE_LOWER_RANGE minimal allowed grade number (inclusive).
+ * @param GRADE_UPPER_RANGE maximal allowed grade number (inclusive).
+ */
 void handleInsertStudentInGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE,
 	const short GRADE_LOWER_RANGE, const short GRADE_UPPER_RANGE)
 {
@@ -479,6 +611,12 @@ void handleInsertStudentInGroup(const short GROUP_LOWER_RANGE, const short GROUP
 	std::cout << "Student successfully added.\n";
 }
 
+/**
+ * Handles the input of data, needed to remove a student from a group.
+ *
+ * @param GROUP_LOWER_RANGE minimal allowed group number (inclusive).
+ * @param GROUP_UPPER_RANGE maximal allowed group number (inclusive).
+ */
 void handleRemoveStudentFromGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
 	const short group = handleInputGroup(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
@@ -495,12 +633,24 @@ void handleRemoveStudentFromGroup(const short GROUP_LOWER_RANGE, const short GRO
 	std::cout << "Student removed successfully.\n";
 }
 
+/**
+ * Handles the input of a group and printing its students.
+ *
+ * @param GROUP_LOWER_RANGE minimal allowed group number (inclusive).
+ * @param GROUP_UPPER_RANGE maximal allowed group number (inclusive).
+ */
 void handlePrintStudentsInGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
 	const short group = handleInputGroup(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
 	printStudentGroup(getStudentsFromGroup(group));
 }
 
+/**
+ * Handles the input of data, needed to sort, print and optionally save multiple student groups.
+ *
+ * @param GROUP_LOWER_RANGE minimal allowed group number (inclusive).
+ * @param GROUP_UPPER_RANGE maximal allowed group number (inclusive).
+ */
 void handleSortStudentGroups(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
 	bool isSortingByGPA = true;
@@ -554,6 +704,9 @@ void handleSortStudentGroups(const short GROUP_LOWER_RANGE, const short GROUP_UP
 	}
 }
 
+/**
+ * Main function, distributing program flow from user input.
+ */
 int main()
 {
 	std::cout << "Welcome to Students Info!\n";

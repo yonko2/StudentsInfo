@@ -242,7 +242,7 @@ student parseStudentString(const std::string line)
  * @param group The student group.
  * @return A studentGroup struct.
  */
-studentGroup getStudentsFromGroup(const short group)
+studentGroup getStudentsGroup(const short group)
 {
 	const std::string filename = getFilenameFromGroup(group);
 	std::vector<student> students;
@@ -314,7 +314,7 @@ bool fnExists(const std::string fn)
 {
 	for (short i = 1; i <= 8; i++)
 	{
-		studentGroup studentsGroup = getStudentsFromGroup(i);
+		studentGroup studentsGroup = getStudentsGroup(i);
 		for (const student student : studentsGroup.students)
 		{
 			if (fn == student.fn)
@@ -322,6 +322,22 @@ bool fnExists(const std::string fn)
 				return true;
 			}
 		}
+	}
+	return false;
+}
+
+/**
+ * Checks if the param student group has any students. If it's empty, prints an error message.
+ *
+ * @param studentGroup The to be checked student group
+ * @return A boolean, true if there are no students, else false;
+ */
+bool isStudentGroupEmpty(const studentGroup studentGroup)
+{
+	if (studentGroup.students.empty())
+	{
+		std::cout << "There is an empty student group.\n";
+		return true;
 	}
 	return false;
 }
@@ -381,7 +397,7 @@ std::vector<studentGroup> getStudentGroups(const std::vector<short> groups)
 
 	for (const short group : groups)
 	{
-		studentGroups.push_back(getStudentsFromGroup(group));
+		studentGroups.push_back(getStudentsGroup(group));
 	}
 
 	return studentGroups;
@@ -419,7 +435,7 @@ studentGroup getStudentGroupAggregate(const std::vector<studentGroup> studentGro
  */
 void insertStudentInGroup(const short group, const student student)
 {
-	studentGroup studentGroup = getStudentsFromGroup(group);
+	studentGroup studentGroup = getStudentsGroup(group);
 
 	studentGroup.students.push_back(student);
 
@@ -434,7 +450,7 @@ void insertStudentInGroup(const short group, const student student)
  */
 void removeStudentFromGroup(const short group, const std::string fn)
 {
-	studentGroup studentGroup = getStudentsFromGroup(group);
+	studentGroup studentGroup = getStudentsGroup(group);
 
 	for (size_t i = 0; i < studentGroup.students.size(); i++)
 	{
@@ -620,6 +636,12 @@ void handleInsertStudentInGroup(const short GROUP_LOWER_RANGE, const short GROUP
 void handleRemoveStudentFromGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
 	const short group = handleInputGroup(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
+
+	if (isStudentGroupEmpty(getStudentsGroup(group)))
+	{
+		return;
+	}
+
 	std::string fn;
 
 	std::cout << "Please input the faculty number of the student: ";
@@ -642,7 +664,7 @@ void handleRemoveStudentFromGroup(const short GROUP_LOWER_RANGE, const short GRO
 void handlePrintStudentsInGroup(const short GROUP_LOWER_RANGE, const short GROUP_UPPER_RANGE)
 {
 	const short group = handleInputGroup(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
-	printStudentGroup(getStudentsFromGroup(group));
+	printStudentGroup(getStudentsGroup(group));
 }
 
 /**
@@ -678,6 +700,11 @@ void handleSortStudentGroups(const short GROUP_LOWER_RANGE, const short GROUP_UP
 	const std::vector<short> groups = handleInputGroups(GROUP_LOWER_RANGE, GROUP_UPPER_RANGE);
 
 	studentGroup studentGroupAggregate = getStudentGroupAggregate(getStudentGroups(groups));
+
+	if (isStudentGroupEmpty(studentGroupAggregate))
+	{
+		return;
+	}
 
 	sortStudentGroup(studentGroupAggregate, isSortingByGPA, isAscending);
 	printStudentGroup(studentGroupAggregate);

@@ -14,12 +14,12 @@ There are eight csv files in the `csv/` directory. In this repo, each .csv file 
 Data is stored in the following format:
 
 In the .csv
-`Name,Faculty number,Courses`
+`Name,FN,Courses`
 `Ivan Ivanov Ivanov,0MI0000000,Algebra/5.50;DIS/5.20`
 
 representing
 ```markdown
-| Name               | Faculty number | Courses               |
+| Name               | FN			  | Courses               |
 |--------------------|----------------|-----------------------|
 | Ivan Ivanov Ivanov | 0MI0000000     | Algebra/5.50;DIS/5.20 |
 ```

@@ -18,8 +18,7 @@ In the .csv
 `Ivan Ivanov Ivanov,0MI0000000,Algebra/5.50;DIS/5.20`
 
 representing
-```markdown
-| Name               | FN			  | Courses               |
+
+| Name               | FN	            | Courses               |
 |--------------------|----------------|-----------------------|
 | Ivan Ivanov Ivanov | 0MI0000000     | Algebra/5.50;DIS/5.20 |
-```

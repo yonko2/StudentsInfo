@@ -584,7 +584,7 @@ void handleInsertStudentInGroup(const short GROUP_LOWER_RANGE, const short GROUP
 	std::vector<course> courses;
 
 	std::cout << "Please input the student's name: ";
-	std::cin >> name;
+	std::getline(std::cin >> std::ws, name);
 
 	std::cout << "Please input a faculty number: ";
 	std::cin >> fn;
